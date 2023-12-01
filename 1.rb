@@ -1,7 +1,7 @@
 def solveStep1(input)
   p input
+    .gsub(/\p{L}/, '')
     .split
-    .map { |line| line.gsub(/\p{L}/, '') }
     .map { |digits| digits[0] + digits[-1] }
     .map(&:to_i)
     .sum
@@ -11,9 +11,9 @@ NUMBERS = { 'one' => '1', 'two' => '2', 'three' => '3', 'four' => '4', 'five' =>
 
 def solveStep2(input)
   p input
+    .gsub(/(?=(one|two|three|four|five|six|seven|eight|nine))/) { NUMBERS[$1] }
+    .gsub(/\p{L}/, '')
     .split
-    .map { |line| line.gsub(/(?=(one|two|three|four|five|six|seven|eight|nine))/) { NUMBERS[$1] } }
-    .map { |line| line.gsub(/\p{L}/, '') }
     .map { |digits| digits[0] + digits[-1] }
     .map(&:to_i)
     .sum
