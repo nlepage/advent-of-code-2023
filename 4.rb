@@ -1,7 +1,7 @@
 def solve(input)
   cards = input
     .split("\n")
-    .map { |line| card, numbers = line.split(':'); winning, have = numbers.split('|').map(&:split); { winningCount: winning.intersection(have).length, copies: 1 } }
+    .map { |line| card, numbers = line.split(':'); winning, have = numbers.split('|').map(&:split); { winningCount: (winning&have).length, copies: 1 } }
 
   p cards
     .map { |card| card[:winningCount] == 0 ? 0 : 2**(card[:winningCount]-1) }
