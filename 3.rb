@@ -1,30 +1,23 @@
 require 'matrix'
 
 def solve(input)
-  numbers = input
-    .split("\n")
-    .map.with_index { |line, y| lnumbers = []; line.scan(/\d+/) { lnumbers << { y: y, x: $~.begin(0), n: $& } }; lnumbers }
+  lines = input.split("\n")
+
+  numbers = lines
+    .map.with_index { |line, y| lnumbers = []; line.scan(/\d+/) { lnumbers << { rows: ([y-1,0].max..([y+1,lines.length-1].min)), cols: [$~.begin(0)-1,0].max..([$~.begin(0)+$&.length,line.length-1].min), n: $&.to_i } }; lnumbers }
     .flatten
   
-  symbols = Matrix[
-    *input
-      .split("\n")
-      .map { |line| line.split('').map { |c| c.match?(/[^\d\.]/) } }
-  ]
+  symbols = Matrix[*lines.map { |line| line.chars.map { |c| c.match?(/[^\d\.]/) } }]
 
-  parts = numbers.select { |number| symbols.minor([number[:y]-1,0].max..(number[:y]+1), [number[:x]-1,0].max..(number[:x]+number[:n].length)).any? }
+  parts = numbers.select { |number| symbols.minor(number[:rows], number[:cols]).any? }
 
   p parts.map { |number| number[:n].to_i }.sum
 
-  gears = Matrix[
-    *input
-      .split("\n")
-      .map { |line| line.split('').map { |c| c == '*' ? 0.5 : 0 } }
-  ]
+  gears = Matrix[*lines.map { |line| line.chars.map { |c| c == '*' ? 0.5 : 0 } }]
 
-  parts.each { |part| ([part[:y]-1,0].max..([part[:y]+1,gears.row_count-1].min)).each { |y| ([part[:x]-1,0].max..([part[:x]+part[:n].length,gears.column_count-1].min)).each { |x| gears[y, x] += 1 } } }
+  parts.each { |part| part[:rows].each { |y| part[:cols].each { |x| gears[y, x] += 1 } } }
   gears.map! { |n| n == 2.5 ? 1 : 0 }
-  parts.each { |part| ([part[:y]-1,0].max..([part[:y]+1,gears.row_count-1].min)).each { |y| ([part[:x]-1,0].max..([part[:x]+part[:n].length,gears.column_count-1].min)).each { |x| gears[y, x] *= part[:n].to_i } } }
+  parts.each { |part| part[:rows].each { |y| part[:cols].each { |x| gears[y, x] *= part[:n] } } }
 
   p gears.sum
 end
