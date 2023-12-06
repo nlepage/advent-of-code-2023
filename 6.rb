@@ -1,5 +1,5 @@
 def ways(time, distance)
-  time+1-(1..).find { |push| (time-push)*push > distance }*2
+  time + 1 - 2 * (time.to_f / 2 - Math.sqrt(time.to_f**2 / 4 - distance) + 1).to_i
 end
 
 def solve(input)
