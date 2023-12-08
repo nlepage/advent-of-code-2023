@@ -20,10 +20,9 @@ def solve1(input)
   p i
 end
 
-def findRepeatingRate(start, directions, nodes)
+def findZ(start, directions, nodes)
   i = 0
   it = directions.each.cycle
-  zs = {}
   pos = start
 
   loop do
@@ -34,11 +33,7 @@ def findRepeatingRate(start, directions, nodes)
       next
     end
 
-    if zs.include? pos
-      return i-zs[pos]
-    else
-      zs[pos] = i
-    end
+    return i
   end
 end
 
@@ -47,7 +42,7 @@ def solve2(input)
 
   start = nodes.keys.select { |key| key.end_with? 'A' }
 
-  rates = start.map { |key| findRepeatingRate(key, directions, nodes) }
+  rates = start.map { |key| findZ(key, directions, nodes) }
 
   gcd = rates.inject { |a, b| a.gcd(b) }
 
