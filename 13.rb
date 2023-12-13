@@ -18,21 +18,25 @@ def symmetryWFudge(arr)
 end
 
 def solve(input)
-  matrices = input.split("\n\n").map { |s| s.split("\n").map { |line| line.each_char.map { |c| c == '#' ? 1 : 0 } } }
+  matrices = input
+    .split("\n\n")
+    .map { |s| s.split("\n")
+    .map { |line| line.each_char.map { |c| c == '#' ? 1 : 0 } } }
+    .map { |matrix| [matrix.map { |l| l.join.to_i(2) }, matrix.transpose.map { |l| l.join.to_i(2) }] }
 
-  p matrices.map { |matrix|
-    y = symmetry matrix.map { |l| l.join.to_i(2) }
+  p matrices.map { |lines, columns|
+    y = symmetry lines
     if y.nil?
-      symmetry matrix.transpose.map { |l| l.join.to_i(2) }
+      symmetry columns
     else
       y*100
     end
   }.sum
 
-  p matrices.map { |matrix|
-    y = symmetryWFudge matrix.map { |l| l.join.to_i(2) }
+  p matrices.map { |lines, columns|
+    y = symmetryWFudge lines
     if y.nil?
-      symmetryWFudge matrix.transpose.map { |l| l.join.to_i(2) }
+      symmetryWFudge columns
     else
       y*100
     end
