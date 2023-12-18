@@ -3,74 +3,97 @@ def parse1(input)
 end
 
 def parse2(input)
-  p input.split("\n").map { |line| /\(#(.{5})(.)\)/.match(line); [$2.tr('0123','RDLU'),$1.to_i(16)] }
+  input.split("\n").map { |line| /\(#(.{5})(.)\)/.match(line); [$2.tr('0123','RDLU'),$1.to_i(16)] }
 end
 
 def solve(instructions)
   instructions
 
-  map = {}
-  map.default = ''
+  vwalls = []
+  corners = {}
+  yy = []
+  
   x,y = 0,0
-
-  instructions.each { |d,l|
-    map[[x,y]] += d
-    l.times {
-      case d
-      when 'U'
-        y -= 1
-      when 'R'
-        x += 1
-      when 'D'
-        y += 1
-      when 'L'
-        x -= 1
-      end
-      map[[x,y]] += d
-    }
-  }
-  map[[0,0]].reverse!
-
+  pd = instructions.last[0]
   chars = {
-    'U' => '│', 'D' => '│',
-    'R' => '─', 'L' => '─',
     'RD' => '┐', 'UL' => '┐',
     'DL' => '┘', 'RU' => '┘',
     'LU' => '└', 'DR' => '└',
     'UR' => '┌', 'LD' => '┌',
   }
+  instructions.each { |d,l|
+    corners[[x,y]] = chars[pd+d]
+    pd = d
+    case d
+    when 'U'
+      vwalls << [x,(y-l)..y]
+      y -= l
+    when 'R'
+      yy.push(y,y+1)
+      x += l
+    when 'D'
+      vwalls << [x,y..(y+l)]
+      y += l
+    when 'L'
+      yy.push(y,y+1)
+      x -= l
+    end
+  }
 
-  map = map.map { |k,v| [k,chars[v]] }.to_h
-  map.default = ''
+  vwalls.sort! { |a,b| a[0]-b[0] }
 
-  xx = map.each_key.map { |x,y| x }.minmax.inject { |min,max| min..max }
-  yy = map.each_key.map { |x,y| y }.minmax.inject { |min,max| min..max }
+  yy.sort!.uniq!.delete_at(-1)
 
   insides = 0
 
+  py = yy.min
+  pyinsides = 0
   yy.each { |y|
+    yinsides = 0
     inside = false
     cur = ''
-    xx.each { |x|
-      v = map[[x,y]]
-      if v==''
-        if inside
-          insides += 1
-        end
-      elsif v!='─'
-        cur += v
-        case cur
-        when '│','└┐','┌┘'
+    px = 0
+    vwalls
+      .select { |x,r| r.include? y }
+      .each { |x,r|
+        if corners.include?([x,y])
+          cur += corners[[x,y]]
+          if cur.length == 2
+            yinsides += x-px
+            case cur
+            when '└┐','┌┘'
+              inside = !inside
+              cur = ''
+            when '└┘','┌┐'
+              cur = ''
+            end
+          else
+            if inside
+              yinsides += x-px
+            else
+              yinsides += 1
+            end
+          end
+        else
+          if inside
+            yinsides += x-px
+          else
+            yinsides += 1
+          end
           inside = !inside
-          cur = ''
-        when '└┘','┌┐'
-          cur = ''
         end
-      end
-    }
+        px = x
+      }
+    
+    insides += pyinsides*(y-py)
+
+    py = y
+    pyinsides = yinsides
   }
 
-  p map.length + insides
+  insides += pyinsides
+
+  p insides
 end
 
 TEST = <<~EOF
@@ -91,7 +114,7 @@ U 2 (#7a21e3)
 EOF
 
 solve(parse1(TEST))
-# solve(parse2(TEST))
+solve(parse2(TEST))
 
 INPUT = <<~EOF
 L 4 (#6c74e0)
@@ -715,4 +738,4 @@ U 8 (#25ae53)
 EOF
 
 solve(parse1(INPUT))
-# solve(parse2(INPUT))
+solve(parse2(INPUT))
